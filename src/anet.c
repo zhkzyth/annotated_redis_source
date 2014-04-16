@@ -314,6 +314,7 @@ int anetUnixServer(char *err, char *path, mode_t perm)
     return s;
 }
 
+// listen socket 没有设置non-blocking，奇怪
 static int anetGenericAccept(char *err, int s, struct sockaddr *sa, socklen_t *len) {
     int fd;
     while(1) {

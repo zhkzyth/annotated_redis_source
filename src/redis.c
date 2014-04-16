@@ -116,7 +116,7 @@ struct redisCommand *commandTable;
  * a flag. Later the populateCommandTable() function will take care of
  * populating the real 'flags' field using this characters.
  *
- * 命令的 FLAG 由 SFLAG 域设置，之后 populateCommandTable() 从 SFLAG 中计算出 
+ * 命令的 FLAG 由 SFLAG 域设置，之后 populateCommandTable() 从 SFLAG 中计算出
  * 真正的 FLAG 。
  *
  * This is the meaning of the flags:
@@ -650,7 +650,7 @@ int htNeedsResize(dict *dict) {
     // 哈希表已用节点数量
     used = dictSize(dict);
 
-    // 当哈希表的大小大于 DICT_HT_INITIAL_SIZE 
+    // 当哈希表的大小大于 DICT_HT_INITIAL_SIZE
     // 并且字典的填充率低于 REDIS_HT_MINFILL 时
     // 返回 1
     return (size && used && size > DICT_HT_INITIAL_SIZE &&
@@ -663,7 +663,7 @@ int htNeedsResize(dict *dict) {
  * 对服务器中的所有数据库键空间字典、以及过期时间字典进行检查，
  * 看是否需要对这些字典进行收缩。
  *
- * 如果字典的使用空间比率低于 REDIS_HT_MINFILL 
+ * 如果字典的使用空间比率低于 REDIS_HT_MINFILL
  * 那么将字典的大小缩小，让 USED/BUCKETS 的比率 <= 1
  */
 void tryResizeHashTables(void) {
@@ -712,7 +712,7 @@ void incrementallyRehash(void) {
  * memory pages are copied). The goal of this function is to update the ability
  * for dict.c to resize the hash tables accordingly to the fact we have o not
  * running childs. */
-// 在执行保存时关闭对数据库的 rehash 
+// 在执行保存时关闭对数据库的 rehash
 // 避免 copy-on-write 问题
 void updateDictResizePolicy(void) {
     if (server.rdb_child_pid == -1 && server.aof_child_pid == -1)
@@ -729,7 +729,7 @@ void updateDictResizePolicy(void) {
  * it will get more aggressive to avoid that too much memory is used by
  * keys that can be removed from the keyspace. */
 /*
- * 主动清除过期 key 
+ * 主动清除过期 key
  */
 void activeExpireCycle(void) {
     int j, iteration = 0;
@@ -1085,7 +1085,7 @@ int serverCron(struct aeEventLoop *eventLoop, long long id, void *clientData) {
         if ((pid = wait3(&statloc,WNOHANG,NULL)) != 0) {
             int exitcode = WEXITSTATUS(statloc);
             int bysignal = 0;
-            
+
             if (WIFSIGNALED(statloc)) bysignal = WTERMSIG(statloc);
 
             if (pid == server.rdb_child_pid) {
@@ -1386,6 +1386,7 @@ void initServerConfig() {
     server.lua_timedout = 0;
     server.migrate_cached_sockets = dictCreate(&migrateCacheDictType,NULL);
 
+    // TODO 这里的作用是什么？
     updateLRUClock();
     resetServerSaveParams();
 
@@ -1436,7 +1437,7 @@ void initServerConfig() {
     server.lpushCommand = lookupCommandByCString("lpush");
     server.lpopCommand = lookupCommandByCString("lpop");
     server.rpopCommand = lookupCommandByCString("rpop");
-    
+
     /* Slow log */
     // 慢查询
     server.slowlog_log_slower_than = REDIS_SLOWLOG_LOG_SLOWER_THAN;
@@ -1475,7 +1476,7 @@ void adjustOpenFilesLimit(void) {
          * for our needs. */
         if (oldlimit < maxfiles) {
             rlim_t f;
-            
+
             f = maxfiles;
             while(f > oldlimit) {
                 limit.rlim_cur = f;
@@ -1535,7 +1536,7 @@ void initServer() {
 
     // 初始化事件状态
     server.el = aeCreateEventLoop(server.maxclients+1024);
-    
+
     // 初始化数据库
     server.db = zmalloc(sizeof(redisDb)*server.dbnum);
 
@@ -1661,7 +1662,7 @@ void initServer() {
     // 初始化慢查询
     slowlogInit();
 
-    // 初始化后台 IO 
+    // 初始化后台 IO
     bioInit();
 }
 
@@ -1702,7 +1703,7 @@ void populateCommandTable(void) {
 }
 
 /*
- * 重置命令状态 
+ * 重置命令状态
  */
 void resetCommandTableStats(void) {
     int numcommands = sizeof(redisCommandTable)/sizeof(struct redisCommand);
@@ -1819,7 +1820,7 @@ void call(redisClient *c, int flags) {
 
     /* Sent the command to clients in MONITOR mode, only if the commands are
      * not geneated from reading an AOF. */
-    // 如果命令不是来自于 AOF 文件，并且命令可以发送给 MONITOR 
+    // 如果命令不是来自于 AOF 文件，并且命令可以发送给 MONITOR
     // 那么将命令发送给 MONITOR
     if (listLength(server.monitors) &&
         !server.loading &&
@@ -1833,7 +1834,7 @@ void call(redisClient *c, int flags) {
     dirty = server.dirty;
     // 执行命令
     c->cmd->proc(c);
-    // 计算命令造成多少个 key 变成 dirty 
+    // 计算命令造成多少个 key 变成 dirty
     dirty = server.dirty-dirty;
     // 计算执行命令耗费的时间
     duration = ustime()-start;
@@ -2055,7 +2056,7 @@ int processCommand(redisClient *c) {
         c->cmd->proc != multiCommand && c->cmd->proc != watchCommand)
     {
         // 如果正在执行事务，
-        // 并且新命令不是 EXEC / DISCARD / MULTI / WATCH 
+        // 并且新命令不是 EXEC / DISCARD / MULTI / WATCH
         // 那么将它们追加到事务队列
         queueMultiCommand(c);
         addReply(c,shared.queued);
@@ -2106,7 +2107,7 @@ int prepareForShutdown(int flags) {
         aof_fsync(server.aof_fd);
     }
 
-    // 决定是否需要在退出之前保存 RDB 
+    // 决定是否需要在退出之前保存 RDB
     if ((server.saveparamslen > 0 && !nosave) || save) {
         redisLog(REDIS_NOTICE,"Saving the final RDB snapshot before exiting.");
         /* Snapshotting. Perform a SYNC SAVE and exit */
@@ -2265,7 +2266,7 @@ sds genRedisInfoString(char *section) {
         if (server.cluster_enabled) mode = "cluster";
         else if (server.sentinel_mode) mode = "sentinel";
         else mode = "standalone";
-    
+
         if (sections++) info = sdscat(info,"\r\n");
         uname(&name);
         info = sdscatprintf(info,
@@ -3030,7 +3031,7 @@ int main(int argc, char **argv) {
             j++;
         }
         // 定义于 config.c ，
-        // 用于清空保存 server.saveparams 和 server.saveparamslen 
+        // 用于清空保存 server.saveparams 和 server.saveparamslen
         resetServerSaveParams();
         // 根据配置文件和传入的选项，修改 server 变量（服务器配置）
         loadServerConfig(configfile,options);

@@ -42,32 +42,32 @@ typedef char *sds;
 // sdshdr 结构
 struct sdshdr {
 
-    // buf 已占用长度
-    int len;
+  // buf 已占用长度
+  int len;
 
-    // buf 剩余可用长度
-    int free;
+  // buf 剩余可用长度
+  int free;
 
-    // 实际保存字符串数据的地方
-    // 利用c99(C99 specification 6.7.2.1.16)中引入的 flexible array member,通过buf来引用sdshdr后面的地址，
-    // 详情google "flexible array member"
-    char buf[];
+  // 实际保存字符串数据的地方
+  // 利用c99(C99 specification 6.7.2.1.16)中引入的 flexible array member,通过buf来引用sdshdr后面的地址，
+  // 详情google "flexible array member"
+  char buf[];
 };
 
 /*
  * 返回 sds buf 的已占用长度
  */
 static inline size_t sdslen(const sds s) {
-    struct sdshdr *sh = (void*)(s-(sizeof(struct sdshdr)));
-    return sh->len;
+  struct sdshdr *sh = (void*)(s-(sizeof(struct sdshdr))); // 为什么要减掉?
+  return sh->len;
 }
 
 /*
  * 返回 sds buf 的可用长度
  */
 static inline size_t sdsavail(const sds s) {
-    struct sdshdr *sh = (void*)(s-(sizeof(struct sdshdr)));
-    return sh->free;
+  struct sdshdr *sh = (void*)(s-(sizeof(struct sdshdr)));
+  return sh->free;
 }
 
 sds sdsnewlen(const void *init, size_t initlen);
@@ -87,7 +87,7 @@ sds sdscpy(sds s, const char *t);
 sds sdscatvprintf(sds s, const char *fmt, va_list ap);
 #ifdef __GNUC__
 sds sdscatprintf(sds s, const char *fmt, ...)
-    __attribute__((format(printf, 2, 3)));
+  __attribute__((format(printf, 2, 3)));
 #else
 sds sdscatprintf(sds s, const char *fmt, ...);
 #endif

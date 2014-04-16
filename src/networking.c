@@ -78,7 +78,7 @@ redisClient *createClient(int fd) {
 
     // 文件描述符
     c->fd = fd;
-    
+
     // 查询缓存相关的设置
     c->bufpos = 0;
     c->querybuf = sdsempty();
@@ -169,7 +169,7 @@ redisClient *createClient(int fd) {
  *
  * Typically gets called every time a reply is built, before adding more
  * data to the clients output buffers. If the function returns REDIS_ERR no
- * data should be appended to the output buffers. 
+ * data should be appended to the output buffers.
  *
  * 这个函数通常在新回复被创建，并将新回复添加到客户端之前调用。
  * 如果函数返回 REDIS_ERR ，那么没有任何缓存会被追加到缓存。
@@ -257,7 +257,7 @@ void _addReplyObjectToList(redisClient *c, robj *o) {
 
         /* Append to this object when possible. */
         // 如果最后一个节点所保存的回复，加上新回复，
-        // 内容总长度小于等于 REDIS_REPLY_CHUNK_BYTES 
+        // 内容总长度小于等于 REDIS_REPLY_CHUNK_BYTES
         // 那么将新回复追加到节点回复当中。
         if (tail->ptr != NULL &&
             sdslen(tail->ptr)+sdslen(o->ptr) <= REDIS_REPLY_CHUNK_BYTES)
@@ -266,7 +266,7 @@ void _addReplyObjectToList(redisClient *c, robj *o) {
             tail = dupLastObjectIfNeeded(c->reply);
             tail->ptr = sdscatlen(tail->ptr,o->ptr,sdslen(o->ptr));
             c->reply_bytes += zmalloc_size_sds(tail->ptr);
-        
+
         // 否则，为新回复单独创建一个节点
         } else {
             incrRefCount(o);
@@ -670,7 +670,7 @@ void addReplyBulkLongLong(redisClient *c, long long ll) {
  * 将 src 客户端的输出缓存复制到 dst 客户端的输出缓存中。
  *
  * The function takes care of freeing the old output buffers of the
- * destination client. 
+ * destination client.
  *
  * 对原有缓存的释放工作由这个函数负责。
  *
@@ -1186,6 +1186,7 @@ int processMultibulkBuffer(redisClient *c) {
     return REDIS_ERR;
 }
 
+// TODO 多次进来这里整理一个完整的请求包？
 void processInputBuffer(redisClient *c) {
     /* Keep processing while there is something in the input buffer */
     while(sdslen(c->querybuf)) {
@@ -1225,6 +1226,7 @@ void processInputBuffer(redisClient *c) {
     }
 }
 
+// TODO 这个函数是怎么保证一次性读完客户端发送内容的呢
 void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
     redisClient *c = (redisClient*) privdata;
     int nread, readlen;
@@ -1252,7 +1254,7 @@ void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
     qblen = sdslen(c->querybuf);
     if (c->querybuf_peak < qblen) c->querybuf_peak = qblen;
     c->querybuf = sdsMakeRoomFor(c->querybuf, readlen);
-    
+
     // 读入到 buf
     nread = read(fd, c->querybuf+qblen, readlen);
 
@@ -1317,7 +1319,7 @@ void getClientsMaxBuffers(unsigned long *longest_output_list,
     *biggest_input_buffer = bib;
 }
 
-/* Turn a Redis client into an sds string representing its state.  * 
+/* Turn a Redis client into an sds string representing its state.  *
  * 将客户端的当前状态信息保存到一个字符串中。
  */
 sds getClientInfoString(redisClient *client) {
@@ -1446,7 +1448,7 @@ void rewriteClientCommandVector(redisClient *c, int argc, ...) {
     va_start(ap,argc);
     for (j = 0; j < argc; j++) {
         robj *a;
-        
+
         a = va_arg(ap, robj*);
         argv[j] = a;
         incrRefCount(a);
@@ -1468,7 +1470,7 @@ void rewriteClientCommandVector(redisClient *c, int argc, ...) {
  * The new val ref count is incremented, and the old decremented. */
 void rewriteClientCommandArgument(redisClient *c, int i, robj *newval) {
     robj *oldval;
-   
+
     redisAssertWithInfo(c,NULL,i < c->argc);
     oldval = c->argv[i];
     c->argv[i] = newval;

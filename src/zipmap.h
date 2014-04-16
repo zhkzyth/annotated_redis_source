@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZIPMAP_H
+#ifndef _ZIMMAP_H
 #define _ZIPMAP_H
 
 unsigned char *zipmapNew(void);
